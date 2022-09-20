@@ -44,6 +44,12 @@ instance : Pow Rat Int where
   pow a | Int.ofNat n => a ^ n 
         | Int.negSucc n => (1 / a) ^ (n + 1)
 
+@[simp]
+lemma Rat.ofInt_zero : Rat.ofInt 0 = 0 := rfl
+
+@[simp]
+lemma Rat.zero_mul (a : Rat) : 0 * a = 0 := sorry
+
 def Dyadic.toRat (d : Dyadic) : Rat :=
   d.mantissa * (2 : Rat) ^ d.exponent
   
@@ -78,6 +84,13 @@ def Dyadic.mk' (m e : Int) : Dyadic :=
       exact hm2 ⟨x, by norm_cast⟩
     ⟩
   termination_by _ => m.natAbs
+
+lemma Dyadic.to_rat_mk' (m e : Int) :
+  Dyadic.toRat (Dyadic.mk' m e) = m * (2 : Rat) ^ e := by
+  rw [Dyadic.mk', Dyadic.toRat]
+  by_cases hm : m = 0
+  · simp [hm]
+  admit
 
 def Dyadic.add (d₁ d₂ : Dyadic) : Dyadic := 
   Dyadic.mk'
@@ -124,18 +137,23 @@ def Dyadic.div₂ (d : Dyadic) (n : Nat) : Dyadic :=
 
 example : (3 : Dyadic).div₂ 4 + (4 : Dyadic) = (67 : Dyadic).div₂ 4 := by rfl
 
-def Dyadic.lt (d₁ d₂ : Dyadic) : Prop :=
+def Dyadic.blt (d₁ d₂ : Dyadic) : Bool :=
   (d₁.mantissa * 2 ^ (d₁.exponent - d₂.exponent).natAbs) <
   (d₂.mantissa * 2 ^ (d₂.exponent - d₁.exponent).natAbs)
 
-instance : LT Dyadic := ⟨Dyadic.lt⟩
+instance : LT Dyadic := ⟨(·.blt ·)⟩
 
-def Dyadic.le (d₁ d₂ : Dyadic) : Prop :=
+instance (a b : Dyadic) : Decidable (a < b) := 
+  inferInstanceAs (Decidable (_ = true))
+
+def Dyadic.ble (d₁ d₂ : Dyadic) : Bool :=
   (d₁.mantissa * 2 ^ (d₁.exponent - d₂.exponent).natAbs) ≤
   (d₂.mantissa * 2 ^ (d₂.exponent - d₁.exponent).natAbs)
 
-instance : LE Dyadic := ⟨Dyadic.le⟩
+instance : LE Dyadic := ⟨(·.ble ·)⟩
 
+instance (a b : Dyadic) : Decidable (a ≤ b) := 
+  inferInstanceAs (Decidable (_ = true))
 namespace Dyadic
 
 @[simp]
@@ -172,6 +190,37 @@ lemma mul_zero (d : Dyadic) : d * 0 = 0 := by
 
 lemma mul_comm (d₁ d₂ : Dyadic) : d₁ * d₂ = d₂ * d₁ := by
   rw [Dyadic.mul_eq, Dyadic.mul_eq, Int.mul_comm, Int.add_comm]
+
+lemma left_distrib (c d₁ d₂ : Dyadic) : c * (d₁ + d₂) = c * d₁ + c * d₂ := sorry
+
+instance : CommRing Dyadic where
+  zero_mul := sorry
+  mul_zero := sorry
+  mul_comm := sorry
+  left_distrib := sorry
+  right_distrib := sorry
+  mul_one := sorry
+  one_mul := sorry
+  mul_assoc := sorry
+  add_comm := sorry
+  add_assoc := sorry
+  add_zero := sorry
+  zero_add := sorry
+  add_left_neg := sorry
+  natCast := (Dyadic.mk' · 0)
+  natCast_zero := sorry
+  natCast_succ _ := sorry
+  intCast := (Dyadic.mk' · 0)
+  intCast_ofNat _ := sorry
+  intCast_negSucc _ := sorry
+  npow_zero' n := sorry
+  npow_succ' n x := sorry
+  nsmul_zero' := sorry
+  nsmul_succ' n x := sorry
+  sub_eq_add_neg := sorry
+  gsmul_zero' := sorry
+  gsmul_succ' n x := sorry
+  gsmul_neg' n x := sorry
 
 end Dyadic
 
